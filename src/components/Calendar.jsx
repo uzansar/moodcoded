@@ -1,6 +1,5 @@
-import styled from 'styled-components';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import styled from 'styled-components';
 import {
   getDaysInMonth,
   getFirstDayOfMonth,
@@ -10,102 +9,109 @@ import {
 import DayCard from './DayCard';
 import { useTheme } from '../context/ThemeContext';
 
-const CalendarContainer = styled.div`
+const CalendarWrapper = styled.div`
   background-color: ${props => props.theme.cardBackground};
+  border: 1px solid ${props => props.theme.border};
   border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 `;
 
-const CalendarHeader = styled.div`
+const ControlsBar = styled.div`
   display: flex;
+  align-items: center;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-  gap: 1rem;
+  flex-wrap: wrap;
+  gap: 12px;
 `;
 
-const MonthYearTitle = styled.h2`
+const MonthDisplay = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`;
+
+const MonthTitle = styled.h2`
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.25rem;
+  font-weight: 700;
   color: ${props => props.theme.text};
-  flex: 1;
-  text-align: center;
+  letter-spacing: -0.3px;
 `;
 
-const NavButtonGroup = styled.div`
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-`;
-
-const NavButton = styled.button`
-  background: ${props => props.theme.accent};
-  color: white;
-  border: none;
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 1.2rem;
+const ButtonGroup = styled.div`
   display: flex;
   align-items: center;
-  justify-content: center;
-  transition: all 0.3s ease;
-
-  &:hover {
-    transform: scale(1.05);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-  }
-
-  &:active {
-    transform: scale(0.95);
-  }
+  gap: 6px;
 `;
 
 const TodayButton = styled.button`
-  background: transparent;
+  background-color: ${props => props.theme.surfaceHover};
   color: ${props => props.theme.text};
   border: 1px solid ${props => props.theme.border};
-  padding: 0 1rem;
-  height: 40px;
-  border-radius: 8px;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 6px;
   cursor: pointer;
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 600;
-  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
 
   &:hover {
-    border-color: ${props => props.theme.accent};
-    color: ${props => props.theme.accent};
+    background-color: ${props => props.theme.surfaceActive};
+    border-color: ${props => props.theme.borderSubtle};
+  }
+`;
+
+const ArrowNavButton = styled.button`
+  background: transparent;
+  border: 1px solid ${props => props.theme.border};
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  color: ${props => props.theme.text};
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background-color: ${props => props.theme.surfaceHover};
   }
 `;
 
 const DayNamesRow = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 8px;
 `;
 
 const DayName = styled.div`
   text-align: center;
-  font-weight: bold;
-  color: ${props => props.theme.text};
-  opacity: 0.7;
-  font-size: 0.9rem;
+  font-weight: 600;
+  color: ${props => props.theme.textSecondary};
+  font-size: 0.72rem;
   text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding-bottom: 4px;
 `;
 
 const DaysGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  gap: 1rem;
+  gap: 8px;
 `;
 
-const Calendar = ({ moods }) => {
+const Calendar = ({ moods, onSelectDate }) => {
   const [currentDate, setCurrentDate] = useState(new Date());
-  const navigate = useNavigate();
   const { theme, isDark } = useTheme();
 
   const daysInMonth = getDaysInMonth(currentDate);
@@ -127,15 +133,8 @@ const Calendar = ({ moods }) => {
     setCurrentDate(new Date());
   };
 
-  const handleDayClick = (day) => {
-    const dateString = formatDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), day));
-    if (dateString > todayStr) return; // Disallow future dates
-    navigate(`/day/${dateString}`);
-  };
-
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-  // Create array of days to display (empty cells for previous month)
   const calendarDays = [];
   for (let i = 0; i < firstDay; i++) {
     calendarDays.push(null);
@@ -145,27 +144,28 @@ const Calendar = ({ moods }) => {
   }
 
   return (
-    <CalendarContainer theme={theme}>
-      <CalendarHeader>
-        <NavButtonGroup>
-          <NavButton onClick={handlePrevMonth} aria-label="Previous Month" theme={theme}>
-            ‹
-          </NavButton>
+    <CalendarWrapper theme={theme}>
+      <ControlsBar>
+        <MonthDisplay>
+          <MonthTitle theme={theme}>
+            {monthName} {currentDate.getFullYear()}
+          </MonthTitle>
+        </MonthDisplay>
+
+        <ButtonGroup>
           <TodayButton onClick={handleTodayClick} theme={theme}>
             Today
           </TodayButton>
-        </NavButtonGroup>
+          <ArrowNavButton onClick={handlePrevMonth} aria-label="Previous Month" theme={theme}>
+            ‹
+          </ArrowNavButton>
+          <ArrowNavButton onClick={handleNextMonth} aria-label="Next Month" theme={theme}>
+            ›
+          </ArrowNavButton>
+        </ButtonGroup>
+      </ControlsBar>
 
-        <MonthYearTitle theme={theme}>
-          {monthName} {currentDate.getFullYear()}
-        </MonthYearTitle>
-
-        <NavButton onClick={handleNextMonth} aria-label="Next Month" theme={theme}>
-          ›
-        </NavButton>
-      </CalendarHeader>
-
-      <DayNamesRow theme={theme}>
+      <DayNamesRow>
         {dayNames.map(day => (
           <DayName key={day} theme={theme}>
             {day}
@@ -191,7 +191,7 @@ const Calendar = ({ moods }) => {
               key={day}
               day={day}
               mood={mood}
-              onClick={() => handleDayClick(day)}
+              onClick={() => onSelectDate?.(dateString)}
               isDark={isDark}
               isToday={isToday}
               isFuture={isFuture}
@@ -200,7 +200,7 @@ const Calendar = ({ moods }) => {
           );
         })}
       </DaysGrid>
-    </CalendarContainer>
+    </CalendarWrapper>
   );
 };
 

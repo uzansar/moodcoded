@@ -5,27 +5,24 @@ export const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
   const [isDark, setIsDark] = useState(() => {
-    // Load from localStorage or check system preference
     const saved = localStorage.getItem('theme');
     if (saved) {
       return saved === 'dark';
     }
-    // Check system preference
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    // YouTube style: default to true dark mode unless explicitly set to light
+    return true;
   });
 
   const theme = isDark ? darkTheme : lightTheme;
 
-  // Save theme preference to localStorage
   useEffect(() => {
     localStorage.setItem('theme', isDark ? 'dark' : 'light');
-    // Optionally: Update document background
     document.body.style.backgroundColor = theme.background;
     document.body.style.color = theme.text;
   }, [isDark, theme]);
 
   const toggleTheme = () => {
-    setIsDark(!isDark);
+    setIsDark(prev => !prev);
   };
 
   return (

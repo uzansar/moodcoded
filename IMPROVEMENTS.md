@@ -56,6 +56,17 @@ This document tracks completed fixes and future roadmap enhancements for Moodcod
 - [x] **4.2 "Today" navigation & highlight** (`src/components/Calendar.jsx`, `src/components/DayCard.jsx`)  
   Added a quick "Today" shortcut button in the calendar header and highlighted today's tile with an accent border and badge.
 
+### 🎨 Priority 5: UX-First Modern Frontend Overhaul
+- [x] **5.0 Authentic Mood Journal Design & UX Architecture**
+  - **Restorative graphite & indigo palette** (`#111215` background, `#18191E` cards, subtle borders `#262830`, calming indigo accents, and organic 1–10 emotional gradient).
+  - **Authentic Moodcoded brand emblem**: bespoke reflection wave emblem replaced foreign video/play metaphors.
+  - **Tactile 1–10 Stepped Mood Selector** (`src/components/MoodModal.jsx`): interactive numbered stepper buttons with human status labels (*Struggling*, *Steady*, *Thriving*) and quick `#Grateful`, `#Calm`, `#Anxious` sentiment tags.
+  - **Collapsible Sidebar & Navigation** (`src/components/Sidebar.jsx`): calm icons and a dedicated streak counter widget (*Calendar*, *Insights*, *Timeline*).
+  - **Clean Header Navigation** (`src/components/Header.jsx`): top search box with instant note searching, "+ Log Mood" button, theme toggle, and user initials avatar.
+  - **DayCard visual aura** (`src/components/DayCard.jsx`): ambient colored accent indicators, clean date numbers, and note snippet previews.
+  - **Refined Area Curve Analytics** (`src/components/StatsPanel.jsx`): replaced harsh lines with soft gradient area curves and human summary metrics.
+  - **Private Journal Auth Card** (`src/pages/LoginPage.jsx`): welcoming, privacy-focused sign-in card.
+
 ---
 
 ## 📌 Remaining Backlog

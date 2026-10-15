@@ -1,50 +1,101 @@
 /**
- * Theme configuration with color palettes
+ * Moodcoded Theme Tokens
+ * Clean, restorative dark & light palettes designed for personal reflection.
  */
 
 const lightTheme = {
   name: 'light',
-  background: '#FFFFFF',
-  cardBackground: '#F9F9F9',
-  text: '#333333',
-  textSecondary: '#666666',
-  border: '#E0E0E0',
-  accent: '#6C63FF',
-  accentLight: '#E8E4FF',
+  background: '#F8F9FA',
+  surface: '#FFFFFF',
+  cardBackground: '#FFFFFF',
+  surfaceHover: '#F1F3F5',
+  surfaceActive: '#E9ECEF',
+  sidebarBg: '#FFFFFF',
+  topbarBg: '#FFFFFF',
+
+  text: '#1A1D20',
+  textSecondary: '#6C757D',
+  textDisabled: '#ADB5BD',
+
+  border: '#E9ECEF',
+  borderSubtle: '#F1F3F5',
+  divider: '#E9ECEF',
+
+  // Calming restorative indigo
+  primary: '#6366F1',
+  primaryHover: '#4F46E5',
+  accent: '#6366F1',
+  accentHover: '#4F46E5',
+  accentLight: 'rgba(99, 102, 241, 0.08)',
+
+  chipBg: '#F1F3F5',
+  chipHover: '#E9ECEF',
+  chipActiveBg: '#1A1D20',
+  chipActiveText: '#FFFFFF',
+
+  inputBg: '#FFFFFF',
+  inputBorder: '#DEE2E6',
+  inputFocusBorder: '#6366F1',
+
+  // Natural emotional spectrum (1 = deep struggle -> 10 = thriving/peace)
   moodColors: {
-    1: '#FFB6C6', // Very Bad
-    2: '#FFB6C6',
-    3: '#FFD4A3', // Bad
-    4: '#FFD4A3',
-    5: '#FFFFBA', // Neutral
-    6: '#FFFFBA',
-    7: '#B6F5B6', // Good
-    8: '#B6F5B6',
-    9: '#A8D5FF', // Great
-    10: '#A8D5FF'
+    1: '#E06D6D', // Stressed / low
+    2: '#E78665',
+    3: '#EEA264',
+    4: '#F3BE68',
+    5: '#E9CD73', // Neutral steady
+    6: '#C6D686',
+    7: '#9AC997', // Good
+    8: '#6CBBA8',
+    9: '#59B1B7',
+    10: '#5C9CE6' // Calm thriving
   }
 };
 
 const darkTheme = {
   name: 'dark',
-  background: '#1E1E1E',
-  cardBackground: '#2D2D2D',
-  text: '#EEEEEE',
-  textSecondary: '#AAAAAA',
-  border: '#444444',
-  accent: '#8B7FFF',
-  accentLight: '#3D3858',
+  background: '#111215',      // Deep graphite
+  surface: '#18191E',
+  cardBackground: '#18191E',
+  surfaceHover: '#21232A',
+  surfaceActive: '#2A2C35',
+  sidebarBg: '#141519',
+  topbarBg: '#141519',
+
+  text: '#F3F4F6',
+  textSecondary: '#9CA3AF',
+  textDisabled: '#6B7280',
+
+  border: '#262830',
+  borderSubtle: '#1E2026',
+  divider: '#262830',
+
+  primary: '#818CF8',
+  primaryHover: '#6366F1',
+  accent: '#818CF8',
+  accentHover: '#6366F1',
+  accentLight: 'rgba(129, 140, 248, 0.12)',
+
+  chipBg: '#21232A',
+  chipHover: '#2A2C35',
+  chipActiveBg: '#F3F4F6',
+  chipActiveText: '#111215',
+
+  inputBg: '#141519',
+  inputBorder: '#2E313B',
+  inputFocusBorder: '#818CF8',
+
   moodColors: {
-    1: '#FF6B8A', // Very Bad
-    2: '#FF6B8A',
-    3: '#FFB347', // Bad
-    4: '#FFB347',
-    5: '#FFD700', // Neutral
-    6: '#FFD700',
-    7: '#6FCF97', // Good
-    8: '#6FCF97',
-    9: '#4A9EFF', // Great
-    10: '#4A9EFF'
+    1: '#F87171',
+    2: '#FB923C',
+    3: '#FBBF24',
+    4: '#FCD34D',
+    5: '#FDE047',
+    6: '#BEF264',
+    7: '#86EFAC',
+    8: '#6EE7B7',
+    9: '#5EEAD4',
+    10: '#93C5FD'
   }
 };
 
