@@ -112,6 +112,15 @@ const ErrorMessage = styled.div`
   border-left: 3px solid #c00;
 `;
 
+const SuccessMessage = styled.div`
+  padding: 0.75rem;
+  background-color: rgba(46, 204, 113, 0.15);
+  color: #27ae60;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  border-left: 3px solid #27ae60;
+`;
+
 const ToggleContainer = styled.div`
   text-align: center;
   font-size: 0.9rem;
@@ -129,10 +138,12 @@ const LoginPage = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setSuccessMessage('');
     setLoading(true);
 
     try {
@@ -145,8 +156,7 @@ const LoginPage = () => {
         
         const result = await signup(username, password);
         if (result.success) {
-          setError('Account created! Logging you in...');
-          // Give user a moment to see the message
+          setSuccessMessage('Account created! Logging you in...');
           setTimeout(() => {
             navigate('/');
           }, 1000);
@@ -176,6 +186,7 @@ const LoginPage = () => {
 
         <Form onSubmit={handleSubmit}>
           {displayError && <ErrorMessage>{displayError}</ErrorMessage>}
+          {successMessage && <SuccessMessage>{successMessage}</SuccessMessage>}
 
           <InputGroup>
             <Label htmlFor="username">Username</Label>
@@ -233,6 +244,7 @@ const LoginPage = () => {
             onClick={() => {
               setIsSignup(!isSignup);
               setError('');
+              setSuccessMessage('');
               setUsername('');
               setPassword('');
               setConfirmPassword('');

@@ -1,9 +1,9 @@
 import styled from 'styled-components';
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTheme } from '../context/ThemeContext';
 import useMoodData from '../hooks/useMoodData';
-import { formatDisplayDate, parseDate } from '../utils/dateUtils';
+import { formatDisplayDate, formatDate } from '../utils/dateUtils';
 import { getMoodColor, getMoodLabel } from '../utils/moodUtils';
 
 const PageContainer = styled.div`
@@ -55,14 +55,21 @@ const SliderInput = styled.input`
   flex: 1;
   height: 8px;
   border-radius: 4px;
-  background: linear-gradient(
+  background: ${props => props.$isDark ? `linear-gradient(
+    to right,
+    #FF6B8A 0%,
+    #FFB347 20%,
+    #FFD700 40%,
+    #6FCF97 60%,
+    #4A9EFF 100%
+  )` : `linear-gradient(
     to right,
     #FFB6C6 0%,
     #FFD4A3 20%,
     #FFFFBA 40%,
     #B6F5B6 60%,
     #A8D5FF 100%
-  );
+  )`};
   outline: none;
   -webkit-appearance: none;
   appearance: none;
@@ -107,7 +114,7 @@ const RatingDisplay = styled.div`
 const RatingValue = styled.div`
   font-size: 1.5rem;
   font-weight: bold;
-  color: ${props => props.moodColor};
+  color: ${props => props.$moodColor};
   margin-bottom: 0.25rem;
 `;
 
@@ -157,13 +164,18 @@ const Button = styled.button`
   cursor: pointer;
   transition: all 0.3s ease;
 
-  &:hover {
+  &:hover:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
   }
 
-  &:active {
+  &:active:not(:disabled) {
     transform: translateY(0);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
   }
 `;
 
@@ -183,55 +195,84 @@ const DeleteButton = styled(Button)`
   margin-top: 1rem;
 `;
 
-const DayDetailPage = () => {
-  const { date } = useParams();
+const ErrorBanner = styled.div`
+  background-color: rgba(255, 107, 107, 0.15);
+  border-left: 4px solid #ff6b6b;
+  color: #ff6b6b;
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+`;
+
+const FutureNotice = styled.div`
+  background-color: rgba(255, 193, 7, 0.15);
+  border-left: 4px solid #ffc107;
+  color: ${props => props.theme.text};
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+`;
+
+const MoodForm = ({ date, initialMood, onSave, onDelete, isFuture, theme, isDark }) => {
   const navigate = useNavigate();
-  const { theme } = useTheme();
-  const { getMood, saveMood, deleteMood } = useMoodData();
+  const [rating, setRating] = useState(initialMood?.rating || 5);
+  const [entry, setEntry] = useState(initialMood?.entry || '');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  const [rating, setRating] = useState(5);
-  const [entry, setEntry] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const mood = getMood(date);
-    if (mood) {
-      setRating(mood.rating || 5);
-      setEntry(mood.entry || '');
+  const handleSave = async () => {
+    if (isFuture) {
+      setErrorMessage('Cannot log moods for future dates.');
+      return;
     }
-    setIsLoading(false);
-  }, [date, getMood]);
 
-  const handleSave = () => {
-    saveMood(date, parseInt(rating), entry);
-    navigate('/');
-  };
+    setIsSubmitting(true);
+    setErrorMessage('');
+    const result = await onSave(date, Number(rating), entry);
+    setIsSubmitting(false);
 
-  const handleDelete = () => {
-    if (confirm('Delete mood entry for this day?')) {
-      deleteMood(date);
+    if (result?.success) {
       navigate('/');
+    } else {
+      setErrorMessage(result?.error || 'Failed to save mood.');
     }
   };
 
-  const moodColor = getMoodColor(rating, false);
-  const moodLabel = getMoodLabel(rating);
+  const handleDelete = async () => {
+    if (!confirm('Delete mood entry for this day?')) {
+      return;
+    }
 
-  if (isLoading) {
-    return (
-      <PageContainer theme={theme}>
-        <FormCard theme={theme}>
-          <Title theme={theme}>Loading...</Title>
-        </FormCard>
-      </PageContainer>
-    );
-  }
+    setIsSubmitting(true);
+    setErrorMessage('');
+    const result = await onDelete(date);
+    setIsSubmitting(false);
+
+    if (result?.success) {
+      navigate('/');
+    } else {
+      setErrorMessage(result?.error || 'Failed to delete mood.');
+    }
+  };
+
+  const moodColor = getMoodColor(Number(rating), isDark);
+  const moodLabel = getMoodLabel(Number(rating));
 
   return (
     <PageContainer theme={theme}>
       <FormCard theme={theme}>
         <Title theme={theme}>📝 Mood Entry</Title>
         <Subtitle theme={theme}>{formatDisplayDate(date)}</Subtitle>
+
+        {isFuture && (
+          <FutureNotice theme={theme}>
+            ⚠️ You are viewing a future date. Logging entries for future dates is disabled.
+          </FutureNotice>
+        )}
+
+        {errorMessage && <ErrorBanner>{errorMessage}</ErrorBanner>}
 
         <FormGroup>
           <Label theme={theme}>How are you feeling?</Label>
@@ -241,11 +282,13 @@ const DayDetailPage = () => {
               min="1"
               max="10"
               value={rating}
-              onChange={(e) => setRating(e.target.value)}
+              onChange={(e) => setRating(Number(e.target.value))}
+              disabled={isFuture || isSubmitting}
+              $isDark={isDark}
               theme={theme}
             />
             <RatingDisplay>
-              <RatingValue moodColor={moodColor}>
+              <RatingValue $moodColor={moodColor}>
                 {rating}/10
               </RatingValue>
               <RatingLabel theme={theme}>{moodLabel}</RatingLabel>
@@ -258,27 +301,62 @@ const DayDetailPage = () => {
           <TextArea
             value={entry}
             onChange={(e) => setEntry(e.target.value)}
-            placeholder="Write about your day, thoughts, or feelings..."
+            placeholder={isFuture ? 'Future entry disabled...' : 'Write about your day, thoughts, or feelings...'}
+            disabled={isFuture || isSubmitting}
             theme={theme}
           />
         </FormGroup>
 
         <ButtonGroup>
-          <CancelButton onClick={() => navigate('/')} theme={theme}>
+          <CancelButton onClick={() => navigate('/')} disabled={isSubmitting} theme={theme}>
             Cancel
           </CancelButton>
-          <SaveButton onClick={handleSave} theme={theme}>
-            Save Entry
+          <SaveButton onClick={handleSave} disabled={isFuture || isSubmitting} theme={theme}>
+            {isSubmitting ? 'Saving...' : 'Save Entry'}
           </SaveButton>
         </ButtonGroup>
 
-        {getMood(date) && (
-          <DeleteButton onClick={handleDelete} theme={theme}>
-            Delete Entry
+        {!isFuture && initialMood && (
+          <DeleteButton onClick={handleDelete} disabled={isSubmitting} theme={theme}>
+            {isSubmitting ? 'Deleting...' : 'Delete Entry'}
           </DeleteButton>
         )}
       </FormCard>
     </PageContainer>
+  );
+};
+
+const DayDetailPage = () => {
+  const { date } = useParams();
+  const { theme, isDark } = useTheme();
+  const { getMood, saveMood, deleteMood, loading: moodLoading } = useMoodData();
+
+  const todayStr = formatDate(new Date());
+  const isFuture = date > todayStr;
+
+  if (moodLoading) {
+    return (
+      <PageContainer theme={theme}>
+        <FormCard theme={theme}>
+          <Title theme={theme}>Loading...</Title>
+        </FormCard>
+      </PageContainer>
+    );
+  }
+
+  const mood = getMood(date);
+
+  return (
+    <MoodForm
+      key={date}
+      date={date}
+      initialMood={mood}
+      onSave={saveMood}
+      onDelete={deleteMood}
+      isFuture={isFuture}
+      theme={theme}
+      isDark={isDark}
+    />
   );
 };
 

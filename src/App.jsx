@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import styled from 'styled-components';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
+import { MoodProvider } from './context/MoodContext';
 import Header from './components/Header';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
@@ -36,7 +37,9 @@ const App = () => {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <AppContent />
+        <MoodProvider>
+          <AppContent />
+        </MoodProvider>
       </AuthProvider>
     </ThemeProvider>
   );

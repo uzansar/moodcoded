@@ -5,7 +5,7 @@ import {
   getLowestDay,
   getWeeklyTrends,
   calculateBestStreak,
-  getDaysInMonth as getDaysWithMoodInMonth
+  countMoodsInMonth
 } from '../utils/moodUtils';
 import { formatDisplayDate, getMonthName } from '../utils/dateUtils';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -69,7 +69,7 @@ const StatsPanel = ({ moods, currentDate }) => {
   const highestDay = getHighestDay(monthMoods);
   const lowestDay = getLowestDay(monthMoods);
   const bestStreak = calculateBestStreak(monthMoods);
-  const daysLogged = getDaysWithMoodInMonth(monthMoods, currentDate.getFullYear(), currentDate.getMonth() + 1);
+  const daysLogged = countMoodsInMonth(monthMoods, currentDate.getFullYear(), currentDate.getMonth() + 1);
   const weeklyTrends = getWeeklyTrends(monthMoods);
 
   const chartData = Object.entries(weeklyTrends)

@@ -1,6 +1,7 @@
 /**
  * Mood utility functions for calculations, color mapping, and stats
  */
+import { formatDate } from './dateUtils';
 
 const MOOD_COLORS = {
   light: {
@@ -80,10 +81,11 @@ export const getWeeklyTrends = (moods) => {
   // Group moods by week (Sunday to Saturday)
   const weeks = {};
   Object.entries(moods).forEach(([dateStr, mood]) => {
-    const date = new Date(dateStr + 'T00:00:00');
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
     const weekStart = new Date(date);
     weekStart.setDate(date.getDate() - date.getDay()); // Set to Sunday
-    const weekKey = weekStart.toISOString().split('T')[0];
+    const weekKey = formatDate(weekStart);
     
     if (!weeks[weekKey]) {
       weeks[weekKey] = [];
@@ -102,12 +104,12 @@ export const getWeeklyTrends = (moods) => {
 };
 
 export const calculateCurrentStreak = (moods, currentDate) => {
-  // Count consecutive days with mood rating from today backwards
+  // Count consecutive days with mood rating >= 5 from today backwards
   let streak = 0;
-  let checkDate = new Date(currentDate);
+  let checkDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
 
   while (true) {
-    const dateStr = checkDate.toISOString().split('T')[0];
+    const dateStr = formatDate(checkDate);
     const mood = moods[dateStr];
     
     if (mood && mood.rating >= 5) {
@@ -122,19 +124,37 @@ export const calculateCurrentStreak = (moods, currentDate) => {
 };
 
 export const calculateBestStreak = (moods) => {
-  // Find the longest streak of consecutive days with mood >= 5
+  // Find the longest streak of consecutive calendar days with mood >= 5
+  const goodDates = Object.entries(moods)
+    .filter(([, mood]) => mood && mood.rating >= 5)
+    .map(([dateStr]) => dateStr)
+    .sort();
+
+  if (goodDates.length === 0) return 0;
+
   let currentStreak = 0;
   let bestStreak = 0;
-  const sortedDates = Object.keys(moods).sort().reverse();
+  let prevDate = null;
 
-  for (const dateStr of sortedDates) {
-    const mood = moods[dateStr];
-    if (mood.rating >= 5) {
-      currentStreak++;
-      bestStreak = Math.max(bestStreak, currentStreak);
+  for (const dateStr of goodDates) {
+    const [year, month, day] = dateStr.split('-').map(Number);
+    const date = new Date(year, month - 1, day);
+
+    if (!prevDate) {
+      currentStreak = 1;
     } else {
-      currentStreak = 0;
+      const diffTime = date.getTime() - prevDate.getTime();
+      const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24));
+
+      if (diffDays === 1) {
+        currentStreak++;
+      } else if (diffDays > 1) {
+        currentStreak = 1;
+      }
     }
+
+    bestStreak = Math.max(bestStreak, currentStreak);
+    prevDate = date;
   }
 
   return bestStreak;
@@ -144,10 +164,13 @@ export const getDaysWithMood = (moods) => {
   return Object.keys(moods).filter(date => moods[date].rating).length;
 };
 
-export const getDaysInMonth = (moods, year, month) => {
+export const countMoodsInMonth = (moods, year, month) => {
   const monthStr = `${year}-${String(month).padStart(2, '0')}`;
   return Object.keys(moods)
     .filter(date => date.startsWith(monthStr))
     .filter(date => moods[date].rating)
     .length;
 };
+
+// Backwards compatibility alias
+export const getDaysInMonth = countMoodsInMonth;

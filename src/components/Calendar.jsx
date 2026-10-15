@@ -33,6 +33,12 @@ const MonthYearTitle = styled.h2`
   text-align: center;
 `;
 
+const NavButtonGroup = styled.div`
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+`;
+
 const NavButton = styled.button`
   background: ${props => props.theme.accent};
   color: white;
@@ -42,15 +48,36 @@ const NavButton = styled.button`
   border-radius: 8px;
   cursor: pointer;
   font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   transition: all 0.3s ease;
 
   &:hover {
-    transform: scale(1.1);
+    transform: scale(1.05);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   }
 
   &:active {
     transform: scale(0.95);
+  }
+`;
+
+const TodayButton = styled.button`
+  background: transparent;
+  color: ${props => props.theme.text};
+  border: 1px solid ${props => props.theme.border};
+  padding: 0 1rem;
+  height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: ${props => props.theme.accent};
+    color: ${props => props.theme.accent};
   }
 `;
 
@@ -85,6 +112,9 @@ const Calendar = ({ moods }) => {
   const firstDay = getFirstDayOfMonth(currentDate);
   const monthName = getMonthName(currentDate);
 
+  const today = new Date();
+  const todayStr = formatDate(today);
+
   const handlePrevMonth = () => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() - 1, 1));
   };
@@ -93,8 +123,13 @@ const Calendar = ({ moods }) => {
     setCurrentDate(new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 1));
   };
 
+  const handleTodayClick = () => {
+    setCurrentDate(new Date());
+  };
+
   const handleDayClick = (day) => {
     const dateString = formatDate(new Date(currentDate.getFullYear(), currentDate.getMonth(), day));
+    if (dateString > todayStr) return; // Disallow future dates
     navigate(`/day/${dateString}`);
   };
 
@@ -112,14 +147,21 @@ const Calendar = ({ moods }) => {
   return (
     <CalendarContainer theme={theme}>
       <CalendarHeader>
-        <NavButton onClick={handlePrevMonth} theme={theme}>
-          ←
-        </NavButton>
+        <NavButtonGroup>
+          <NavButton onClick={handlePrevMonth} aria-label="Previous Month" theme={theme}>
+            ‹
+          </NavButton>
+          <TodayButton onClick={handleTodayClick} theme={theme}>
+            Today
+          </TodayButton>
+        </NavButtonGroup>
+
         <MonthYearTitle theme={theme}>
           {monthName} {currentDate.getFullYear()}
         </MonthYearTitle>
-        <NavButton onClick={handleNextMonth} theme={theme}>
-          →
+
+        <NavButton onClick={handleNextMonth} aria-label="Next Month" theme={theme}>
+          ›
         </NavButton>
       </CalendarHeader>
 
@@ -141,6 +183,8 @@ const Calendar = ({ moods }) => {
             new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
           );
           const mood = moods[dateString];
+          const isToday = dateString === todayStr;
+          const isFuture = dateString > todayStr;
 
           return (
             <DayCard
@@ -149,6 +193,8 @@ const Calendar = ({ moods }) => {
               mood={mood}
               onClick={() => handleDayClick(day)}
               isDark={isDark}
+              isToday={isToday}
+              isFuture={isFuture}
               theme={theme}
             />
           );
